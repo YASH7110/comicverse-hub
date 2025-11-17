@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComicVerse Hub</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #ef4444; /* Red 500 */
+            --color-secondary: #fcd34d; /* Amber 300 */
+            --color-dark: #1f2937; /* Gray 800 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .comic-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .comic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        /* Zoom effect for detail page image */
+        .detail-image-container {
+            overflow: hidden;
+            border-radius: 0.75rem;
+        }
+        .detail-image-container img {
+            transition: transform 0.5s ease;
+        }
+        .detail-image-container:hover img {
+            transform: scale(1.1);
+        }
+        /* Custom scrollbar for comic book feel */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-primary);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #cc2222;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Sticky Header -->
+    <header class="sticky top-0 z-50 bg-white shadow-xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <h1 id="home-nav" class="text-3xl font-extrabold text-gray-900 cursor-pointer transition hover:text-red-600">
+                <span class="text-red-600">Comic</span>Verse Hub
+            </h1>
+            <nav>
+                <button onclick="showView('homepage')" class="text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition">Home</button>
+                <button onclick="showView('browse-comics')" class="text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition">Browse</button>
+                <button onclick="showView('shopping-cart')" class="text-white bg-red-600 hover:bg-red-700 ml-4 px-4 py-2 rounded-full text-sm font-bold shadow-md relative transition">
+                    Cart (<span id="cart-count">0</span>)
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Custom Modal Popup -->
+        <div id="custom-modal" class="hidden fixed inset-0 z-[100] bg-gray-900 bg-opacity-75 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-2xl p-6 w-full max-w-sm transform transition-all duration-300 scale-100">
+                <h3 id="modal-title" class="text-2xl font-bold mb-2 text-red-600"></h3>
+                <p id="modal-message" class="text-gray-700 mb-4"></p>
+                <button onclick="document.getElementById('custom-modal').classList.add('hidden')" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition shadow-md">Close</button>
+            </div>
+        </div>
+
+        <!-- 1. Homepage View -->
+        <div id="homepage" class="view">
+            <h2 class="text-4xl font-extrabold text-gray-900 mb-8">Welcome to the Multiverse!</h2>
+
+            <!-- Hero Carousel -->
+            <div class="relative bg-gray-800 rounded-xl overflow-hidden shadow-xl mb-12">
+                <div id="carousel-container" class="relative h-64 sm:h-96 md:h-[400px]">
+                    <!-- Carousel slides injected by JS -->
+                </div>
+                <!-- Carousel Controls -->
+                <button onclick="prevSlide()" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/50 text-white p-3 rounded-full transition z-10">
+                    &#10094;
+                </button>
+                <button onclick="nextSlide()" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/50 text-white p-3 rounded-full transition z-10">
+                    &#10095;
+                </button>
+                <div id="carousel-dots" class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2 z-10">
+                    <!-- Dots injected by JS -->
+                </div>
+            </div>
+
+            <!-- New Releases Section -->
+            <section class="mb-12">
+                <h3 class="text-3xl font-bold text-gray-900 border-l-4 border-red-600 pl-3 mb-6">💥 New Releases</h3>
+                <div id="new-releases-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                    <!-- Comic cards injected by JS -->
+                </div>
+            </section>
+
+            <!-- Popular Comics Section -->
+            <section class="mb-12">
+                <h3 class="text-3xl font-bold text-gray-900 border-l-4 border-red-600 pl-3 mb-6">⭐ Popular Comics</h3>
+                <div id="popular-comics-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                    <!-- Comic cards injected by JS -->
+                </div>
+            </section>
+
+            <!-- Top Publishers Section -->
+            <section class="mb-12">
+                <h3 class="text-3xl font-bold text-gray-900 border-l-4 border-red-600 pl-3 mb-6">🏛️ Top Publishers</h3>
+                <div id="publishers-list" class="flex flex-wrap gap-4">
+                    <!-- Publisher buttons injected by JS -->
+                </div>
+            </section>
+        </div>
+
+        <!-- 2. Browse Comics View -->
+        <div id="browse-comics" class="view hidden">
+            <h2 class="text-4xl font-extrabold text-gray-900 mb-8">Full Catalog</h2>
+
+            <!-- Filter & Sort Controls -->
+            <div class="flex flex-col sm:flex-row gap-4 mb-8 p-4 bg-white rounded-xl shadow-lg">
+                <div class="flex-1">
+                    <label for="sort-by" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                    <select id="sort-by" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 p-2">
+                        <option value="title-asc">Title (A-Z)</option>
+                        <option value="price-asc">Price (Low to High)</option>
+                        <option value="price-desc">Price (High to Low)</option>
+                        <option value="year-desc">Release Year (Newest)</option>
+                    </select>
+                </div>
+                <div class="flex-1">
+                    <label for="filter-publisher" class="block text-sm font-medium text-gray-700 mb-1">Filter Publisher</label>
+                    <select id="filter-publisher" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 p-2">
+                        <option value="">All Publishers</option>
+                        <!-- Options injected by JS -->
+                    </select>
+                </div>
+                <div class="flex-1">
+                    <label for="filter-genre" class="block text-sm font-medium text-gray-700 mb-1">Filter Genre</label>
+                    <select id="filter-genre" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 p-2">
+                        <option value="">All Genres</option>
+                        <!-- Options injected by JS -->
+                    </select>
+                </div>
+                <div class="flex-1">
+                    <label for="filter-character" class="block text-sm font-medium text-gray-700 mb-1">Filter Character</label>
+                    <select id="filter-character" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 p-2">
+                        <option value="">All Characters</option>
+                        <!-- Options injected by JS -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Comic Grid -->
+            <div id="browse-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                <!-- All comic cards injected by JS -->
+            </div>
+            <p id="no-results" class="text-center text-xl text-gray-500 mt-12 hidden">No comics found matching your criteria.</p>
+        </div>
+
+        <!-- 3. Comic Detail Page View -->
+        <div id="comic-detail" class="view hidden">
+            <button onclick="showView('browse-comics')" class="text-red-600 hover:text-red-800 font-semibold mb-6 flex items-center transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Back to Browse
+            </button>
+
+            <div id="detail-content" class="bg-white rounded-xl shadow-2xl p-6 lg:p-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Detail content injected by JS -->
+            </div>
+        </div>
+
+        <!-- 4. Shopping Cart View -->
+        <div id="shopping-cart" class="view hidden">
+            <h2 class="text-4xl font-extrabold text-gray-900 mb-8">Your Cart</h2>
+
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Cart Items List -->
+                <div class="lg:w-2/3 bg-white rounded-xl shadow-lg p-6">
+                    <div id="cart-items-list">
+                        <!-- Cart items injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Cart Summary -->
+                <div class="lg:w-1/3">
+                    <div class="bg-gray-800 text-white p-6 rounded-xl shadow-lg sticky top-24">
+                        <h3 class="text-2xl font-bold mb-4 border-b border-gray-700 pb-3 text-red-300">Order Summary</h3>
+                        <div class="space-y-2 mb-6">
+                            <div class="flex justify-between text-lg">
+                                <span>Subtotal:</span>
+                                <span id="cart-subtotal" class="font-semibold">$0.00</span>
+                            </div>
+                            <div class="flex justify-between text-lg">
+                                <span>Tax (8%):</span>
+                                <span id="cart-tax" class="font-semibold">$0.00</span>
+                            </div>
+                            <div class="flex justify-between pt-3 border-t border-gray-700 text-2xl font-extrabold text-red-400">
+                                <span>Grand Total:</span>
+                                <span id="cart-grand-total">$0.00</span>
+                            </div>
+                        </div>
+                        <button id="checkout-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg text-lg transition shadow-xl disabled:opacity-50" disabled>
+                            Proceed to Checkout
+                        </button>
+                        <button onclick="clearCart()" class="w-full mt-3 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 rounded-lg transition">
+                            Clear Cart
+                        </button>
+                        <button onclick="showView('browse-comics')" class="w-full mt-3 text-red-300 hover:text-red-100 font-semibold py-3 transition">
+                            Continue Browsing
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <p id="empty-cart-message" class="text-center text-xl text-gray-500 mt-12 hidden">Your cart is empty. Time to find some great reads!</p>
+        </div>
+
+    </main>
+
+    <!-- Sticky Footer -->
+    <footer class="bg-gray-900 text-white py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
+            &copy; <span id="current-year"></span> ComicVerse Hub. All rights reserved. | Client-Side Demo
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // --- 1. Static Data and Constants ---
+        const STORAGE_KEY = 'comicverseHubCart';
+        const TAX_RATE = 0.08;
+        const VIEW_IDS = ['homepage', 'browse-comics', 'comic-detail', 'shopping-cart'];
+
+        const comicsData = [
+            // IMPORTANT NOTE FOR LOCAL USAGE:
+            // To use your own images, you must:
+            // 1. Create a folder named 'images' in the same directory as this index.html file.
+            // 2. Download and save all your images into the 'images' folder using file names like 'spiderman_poster.jpeg'.
+            // 3. You can replace any 'https://placehold.co/...' URLs below with your own local paths (e.g., './images/my_comic.jpg').
+            
+            {
+                id: "001",
+                title: "Spider-Man: Into the Multiverse",
+                publisher: "Marvel Comics",
+                genre: "Superhero",
+                character: "Spider-Man",
+                characterImage: "https://placehold.co/100x100/b91c1c/ffffff?text=SP",
+                price: 12.99,
+                releaseYear: 2023,
+                description: "Miles Morales travels across different dimensions to save the universe from a catastrophic event, encountering various Spider-People along the way. A critically acclaimed animated masterpiece adapted for print.",
+                creators: { writer: "Jed MacKay", artist: "Sara Pichelli" },
+                // Action Required: Save your uploaded Spider-Verse poster image as 'spiderman_poster.jpeg' inside the 'images' folder.
+                image: "images/spiderman_poster.jpeg", 
+                isNew: true,
+                isPopular: true,
+                // The variant images should use the local path too.
+                variantImages: [
+                    "./images/spiderman_poster.jpeg", 
+                    "images/download (7).jpeg", // Placeholder for variety
+                    "images/download (8).jpeg", // Placeholder for variety
+                    "images/download (9).jpeg", // Placeholder for variety
+                ]
+            },
+            {
+                id: "002",
+                title: "The Sandman: Dream Country",
+                publisher: "DC/Vertigo",
+                genre: "Fantasy",
+                character: "Dream",
+                characterImage: "https://placehold.co/100x100/374151/ffffff?text=D",
+                price: 18.50,
+                releaseYear: 1991,
+                description: "A collection of four standalone stories, including the fan-favorite 'A Dream of a Thousand Cats' and 'Calliope'. A masterpiece of modern storytelling by Neil Gaiman.",
+                creators: { writer: "Neil Gaiman", artist: "Various" },
+                image: "images/Sansman.jpg",
+                isNew: false,
+                isPopular: true
+            },
+            {
+                id: "003",
+                title: "Watchmen Deluxe Edition",
+                publisher: "DC Comics",
+                genre: "Mystery",
+                character: "Rorschach",
+                characterImage: "https://placehold.co/100x100/1f2937/ffffff?text=R",
+                price: 29.99,
+                releaseYear: 1987,
+                description: "An intricate mystery about retired superheroes, governmental conspiracy, and the nature of morality. Frequently cited as one of the best graphic novels ever written.",
+                creators: { writer: "Alan Moore", artist: "Dave Gibbons" },
+                image: "images/download (1).jpeg",
+                isNew: true,
+                isPopular: false
+            },
+            {
+                id: "004",
+                title: "Saga: Compendium One",
+                publisher: "Image Comics",
+                genre: "Sci-Fi",
+                character: "Alana & Marko",
+                characterImage: "https://placehold.co/100x100/059669/ffffff?text=A&M",
+                price: 59.99,
+                releaseYear: 2012,
+                description: "A sweeping sci-fi/fantasy series about a family struggling to find their place in a hostile universe. Think Romeo and Juliet meets Star Wars, filled with incredible depth and creativity.",
+                creators: { writer: "Brian K. Vaughan", artist: "Fiona Staples" },
+                image: "images/download (5).jpeg",
+                isNew: false,
+                isPopular: true
+            },
+            {
+                id: "005",
+                title: "Black Panther: A Nation Under Our Feet",
+                publisher: "Marvel Comics",
+                genre: "Superhero",
+                character: "Black Panther",
+                characterImage: "https://placehold.co/100x100/000000/ffffff?text=BP",
+                price: 15.99,
+                releaseYear: 2016,
+                description: "Ta-Nehisi Coates' run redefines T'Challa and the nation of Wakanda as they face internal rebellion and existential threats.",
+                creators: { writer: "Ta-Nehisi Coates", artist: "Brian Stelfreeze" },
+                image: "images/download.jpeg",
+                isNew: true,
+                isPopular: false
+            },
+            {
+                id: "006",
+                title: "Batman: The Long Halloween",
+                publisher: "DC Comics",
+                genre: "Mystery",
+                character: "Batman",
+                characterImage: "https://placehold.co/100x100/1d4ed8/ffffff?text=B",
+                price: 19.99,
+                releaseYear: 1997,
+                description: "A year-long mystery follows Batman as he attempts to identify Holiday, a killer who strikes only on holidays, forcing the Caped Crusader to race against the calendar.",
+                creators: { writer: "Jeph Loeb", artist: "Tim Sale" },
+                image: "images/images.jpeg",
+                isNew: false,
+                isPopular: true
+            },
+            {
+                id: "007",
+                title: "Y: The Last Man",
+                publisher: "DC/Vertigo",
+                genre: "Dystopian",
+                character: "Yorick Brown",
+                characterImage: "https://placehold.co/100x100/6b7280/ffffff?text=Y",
+                price: 24.99,
+                releaseYear: 2002,
+                description: "The story of Yorick Brown, the last surviving male mammal on Earth, and his monkey Ampersand, as they search for answers and safety in a world without men.",
+                creators: { writer: "Brian K. Vaughan", artist: "Pia Guerra" },
+                image: "images/download (2).jpeg",
+                isNew: true,
+                isPopular: false
+            },
+            {
+                id: "008",
+                title: "Ms. Marvel: No Normal",
+                publisher: "Marvel Comics",
+                genre: "Superhero",
+                character: "Ms. Marvel",
+                characterImage: "https://placehold.co/100x100/f59e0b/ffffff?text=MM",
+                price: 10.99,
+                releaseYear: 2014,
+                description: "Kamala Khan, a Pakistani-American teenager from Jersey City, suddenly gains shapeshifting powers and must balance her new life as a superhero with family expectations.",
+                creators: { writer: "G. Willow Wilson", artist: "Adrian Alphona" },
+                image: "images/download (3).jpeg",
+                isNew: false,
+                isPopular: true
+            }
+        ];
+
+        // --- 2. Global State ---
+        let cart = [];
+        let currentSlideIndex = 0;
+        // Ensure carousel data is refreshed to use the updated image URL if applicable
+        const carouselData = comicsData.filter(c => c.isPopular).slice(0, 3); 
+
+        // --- 3. Utility Functions (Modal, Navigation, LocalStorage) ---
+
+        /**
+         * Shows the custom modal with a title and message.
+         * @param {string} title
+         * @param {string} message
+         */
+        function showModal(title, message) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        /**
+         * Switches the active view (page).
+         * @param {string} viewId - The ID of the view to show.
+         * @param {string | null} comicId - Optional ID for detail page.
+         */
+        function showView(viewId, comicId = null) {
+            window.scrollTo(0, 0); // Scroll to top on navigation
+            VIEW_IDS.forEach(id => {
+                const view = document.getElementById(id);
+                if (view) {
+                    view.classList.add('hidden');
+                }
+            });
+
+            const activeView = document.getElementById(viewId);
+            if (activeView) {
+                activeView.classList.remove('hidden');
+            }
+
+            if (viewId === 'comic-detail' && comicId) {
+                renderDetail(comicId);
+            } else if (viewId === 'shopping-cart') {
+                renderCart();
+            } else if (viewId === 'browse-comics') {
+                // Ensure initial rendering is done if this is the first navigation
+                renderBrowsePage(comicsData);
+            }
+        }
+
+        // --- 4. Local Storage and Cart Management ---
+
+        /**
+         * Loads the cart from localStorage.
+         * @returns {Array} The cart array.
+         */
+        function loadCart() {
+            const cartJSON = localStorage.getItem(STORAGE_KEY);
+            cart = cartJSON ? JSON.parse(cartJSON) : [];
+            updateCartCount();
+            return cart;
+        }
+
+        /**
+         * Saves the current cart state to localStorage.
+         */
+        function saveCart() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+            updateCartCount();
+        }
+
+        /**
+         * Updates the cart icon count in the header.
+         */
+        function updateCartCount() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cart-count').textContent = totalItems;
+            document.getElementById('checkout-btn').disabled = totalItems === 0;
+        }
+
+        /**
+         * Handles adding a comic to the cart.
+         * @param {object} comic
+         */
+        function handleAddToCart(comic) {
+            const existingItem = cart.find(item => item.id === comic.id);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...comic, quantity: 1 });
+            }
+            saveCart();
+            renderCart(); // Re-render cart if we're on the page
+            showModal('Success!', `${comic.title} has been added to your cart.`);
+        }
+
+        /**
+         * Removes all items from the cart.
+         */
+        function clearCart() {
+            cart = [];
+            saveCart();
+            renderCart();
+            showModal('Cart Cleared', 'Your shopping cart has been emptied.');
+        }
+
+        // --- 5. Rendering Functions ---
+
+        /**
+         * Generates the HTML for a single comic card.
+         * @param {object} comic
+         * @returns {string} HTML string
+         */
+        function createComicCard(comic) {
+            return `
+                <div onclick="showView('comic-detail', '${comic.id}')" class="comic-card bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer">
+                    <img src="${comic.image}" alt="${comic.title} cover" class="w-full h-auto object-cover rounded-t-xl"
+                         onerror="this.onerror=null; this.src='https://placehold.co/400x600/fcd34d/ef4444?text=Comic+Missing'">
+                    <div class="p-4">
+                        <h4 class="text-lg font-bold truncate text-gray-900">${comic.title}</h4>
+                        <p class="text-sm text-gray-500 truncate">${comic.publisher}</p>
+                        <p class="text-xl font-extrabold text-red-600 mt-2">$${comic.price.toFixed(2)}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * Renders the Homepage sections.
+         */
+        function renderHomepage() {
+            const newReleases = comicsData.filter(c => c.isNew).slice(0, 6);
+            const popularComics = comicsData.filter(c => c.isPopular).slice(0, 6);
+
+            document.getElementById('new-releases-grid').innerHTML = newReleases.map(createComicCard).join('');
+            document.getElementById('popular-comics-grid').innerHTML = popularComics.map(createComicCard).join('');
+
+            // Populate Top Publishers buttons
+            const publishers = [...new Set(comicsData.map(c => c.publisher))];
+            const publishersHtml = publishers.map(p => `
+                <button onclick="filterByPublisher('${p}')" class="px-4 py-2 bg-red-100 text-red-700 font-semibold rounded-full hover:bg-red-200 transition text-sm shadow-md">
+                    ${p}
+                </button>
+            `).join('');
+            document.getElementById('publishers-list').innerHTML = publishersHtml;
+        }
+
+        /**
+         * Renders the Browse page grid based on current filters/sort.
+         * @param {Array} data - The array of comics to display.
+         */
+        function renderBrowsePage(data = comicsData) {
+            // 1. Get filter and sort values
+            const publisherFilter = document.getElementById('filter-publisher').value;
+            const genreFilter = document.getElementById('filter-genre').value;
+            const characterFilter = document.getElementById('filter-character').value;
+            const sortBy = document.getElementById('sort-by').value;
+
+            // 2. Apply Filters
+            let filteredComics = data.filter(comic => {
+                const publisherMatch = !publisherFilter || comic.publisher === publisherFilter;
+                const genreMatch = !genreFilter || comic.genre === genreFilter;
+                const characterMatch = !characterFilter || comic.character === characterFilter;
+                return publisherMatch && genreMatch && characterMatch;
+            });
+
+            // 3. Apply Sorting
+            filteredComics.sort((a, b) => {
+                switch (sortBy) {
+                    case 'title-asc':
+                        return a.title.localeCompare(b.title);
+                    case 'price-asc':
+                        return a.price - b.price;
+                    case 'price-desc':
+                        return b.price - a.price;
+                    case 'year-desc':
+                        return b.releaseYear - a.releaseYear;
+                    default:
+                        return 0;
+                }
+            });
+
+            // 4. Render
+            const grid = document.getElementById('browse-grid');
+            const noResults = document.getElementById('no-results');
+
+            if (filteredComics.length === 0) {
+                grid.innerHTML = '';
+                noResults.classList.remove('hidden');
+            } else {
+                grid.innerHTML = filteredComics.map(createComicCard).join('');
+                noResults.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Renders the Comic Detail page.
+         * @param {string} comicId
+         */
+        function renderDetail(comicId) {
+            const comic = comicsData.find(c => c.id === comicId);
+            const detailContent = document.getElementById('detail-content');
+
+            if (!comic) {
+                detailContent.innerHTML = `<p class="text-xl text-red-500">Comic not found!</p>`;
+                return;
+            }
+
+            // Generate variant images HTML if they exist
+            let variantImagesHtml = '';
+            if (comic.variantImages && comic.variantImages.length > 0) {
+                variantImagesHtml = `
+                    <h3 class="text-xl font-bold border-b pb-2 mb-3 text-gray-800 mt-8">Multiverse Variants</h3>
+                    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mb-8">
+                        ${comic.variantImages.map(imgSrc => `
+                            <div class="w-full aspect-square rounded-lg overflow-hidden shadow-md">
+                                <img src="${imgSrc}" alt="Spider-Man variant" class="w-full h-full object-cover">
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            detailContent.innerHTML = `
+                <!-- Image Container -->
+                <div class="lg:col-span-1 detail-image-container shadow-2xl">
+                    <img src="${comic.image}" alt="${comic.title} cover" class="w-full h-auto object-cover transition-transform duration-500"
+                         onerror="this.onerror=null; this.src='https://placehold.co/400x600/fcd34d/ef4444?text=Comic+Missing'">
+                </div>
+
+                <!-- Details -->
+                <div class="lg:col-span-2">
+                    <h1 class="text-5xl font-extrabold text-gray-900 mb-2">${comic.title}</h1>
+                    <p class="text-2xl font-semibold text-red-600 mb-4">$${comic.price.toFixed(2)}</p>
+
+                    <!-- Character Info Block -->
+                    <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg border border-gray-200 mb-6">
+                        <img src="${comic.characterImage}" alt="${comic.character} portrait" class="w-16 h-16 object-cover rounded-full shadow-lg border-2 border-red-500"
+                             onerror="this.onerror=null; this.src='https://placehold.co/100x100/6b7280/ffffff?text=No+Char+Img'">
+                        <div>
+                            <p class="text-sm text-gray-500">Main Character:</p>
+                            <p class="text-xl font-bold text-gray-800">${comic.character}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-y-2 mb-6 text-gray-700">
+                        <p><strong>Publisher:</strong> <span class="text-red-500">${comic.publisher}</span></p>
+                        <p><strong>Genre:</strong> ${comic.genre}</p>
+                        <p><strong>Character:</strong> ${comic.character}</p>
+                        <p><strong>Release Year:</strong> ${comic.releaseYear}</p>
+                        <p class="col-span-2"><strong>Writer:</strong> ${comic.creators.writer}</p>
+                        <p class="col-span-2"><strong>Artist:</strong> ${comic.creators.artist}</p>
+                    </div>
+
+                    <h3 class="text-xl font-bold border-b pb-2 mb-3 text-gray-800">Synopsis</h3>
+                    <p class="text-gray-600 mb-8 leading-relaxed">${comic.description}</p>
+
+                    ${variantImagesHtml} 
+
+                    <button id="add-to-cart-btn" data-comic-id="${comic.id}" class="w-full lg:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg text-xl transition shadow-xl flex items-center justify-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span>Add to Cart</span>
+                    </button>
+                </div>
+            `;
+
+            // Attach 'Add to Cart' listener dynamically
+            document.getElementById('add-to-cart-btn').addEventListener('click', () => {
+                handleAddToCart(comic);
+            });
+        }
+
+        /**
+         * Renders the Shopping Cart view.
+         */
+        function renderCart() {
+            loadCart(); // Ensure cart state is fresh
+
+            const itemsList = document.getElementById('cart-items-list');
+            const emptyMessage = document.getElementById('empty-cart-message');
+
+            if (cart.length === 0) {
+                itemsList.innerHTML = '';
+                emptyMessage.classList.remove('hidden');
+                document.getElementById('checkout-btn').disabled = true;
+                updateCartSummary(0, 0, 0);
+                return;
+            }
+
+            emptyMessage.classList.add('hidden');
+            document.getElementById('checkout-btn').disabled = false;
+
+            let subtotal = 0;
+            const itemsHtml = cart.map(item => {
+                const lineTotal = item.price * item.quantity;
+                subtotal += lineTotal;
+                return `
+                    <div class="flex items-center space-x-4 border-b py-4 last:border-b-0">
+                        <!-- Image -->
+                        <div class="w-16 h-24 flex-shrink-0">
+                            <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover rounded-md shadow-md"
+                                 onerror="this.onerror=null; this.src='https://placehold.co/400x600/fcd34d/ef4444?text=Comic'">
+                        </div>
+
+                        <!-- Title & Price -->
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-lg font-bold truncate">${item.title}</h4>
+                            <p class="text-sm text-gray-500">${item.publisher}</p>
+                            <p class="text-md text-red-600 font-semibold">$${item.price.toFixed(2)}</p>
+                        </div>
+
+                        <!-- Quantity Control -->
+                        <div class="flex items-center space-x-2">
+                            <button onclick="updateQuantity('${item.id}', -1)" class="bg-gray-200 hover:bg-gray-300 p-1 rounded-full w-8 h-8 font-bold transition">-</button>
+                            <span class="w-6 text-center font-bold">${item.quantity}</span>
+                            <button onclick="updateQuantity('${item.id}', 1)" class="bg-gray-200 hover:bg-gray-300 p-1 rounded-full w-8 h-8 font-bold transition">+</button>
+                        </div>
+
+                        <!-- Line Total -->
+                        <div class="w-20 text-right">
+                            <span class="text-lg font-extrabold text-red-800">$${lineTotal.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            itemsList.innerHTML = itemsHtml;
+
+            // Update Summary
+            const tax = subtotal * TAX_RATE;
+            const grandTotal = subtotal + tax;
+            updateCartSummary(subtotal, tax, grandTotal);
+        }
+
+        /**
+         * Updates the quantity of a cart item.
+         * @param {string} id - Comic ID.
+         * @param {number} delta - Change in quantity (-1 or 1).
+         */
+        function updateQuantity(id, delta) {
+            const itemIndex = cart.findIndex(item => item.id === id);
+            if (itemIndex > -1) {
+                cart[itemIndex].quantity += delta;
+                if (cart[itemIndex].quantity <= 0) {
+                    cart.splice(itemIndex, 1); // Remove if quantity is zero or less
+                }
+                saveCart();
+                renderCart();
+            }
+        }
+
+        /**
+         * Updates the cart summary display.
+         * @param {number} subtotal
+         * @param {number} tax
+         * @param {number} grandTotal
+         */
+        function updateCartSummary(subtotal, tax, grandTotal) {
+            document.getElementById('cart-subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('cart-tax').textContent = `$${tax.toFixed(2)}`;
+            document.getElementById('cart-grand-total').textContent = `$${grandTotal.toFixed(2)}`;
+        }
+
+        /**
+         * Triggers the Checkout process (simulated).
+         */
+        function checkout() {
+            const total = document.getElementById('cart-grand-total').textContent;
+            showModal('Order Simulated — Success!', `Your order totaling ${total} has been simulated and placed. Thank you for shopping with ComicVerse Hub!`);
+            clearCart();
+            // Stay on the cart page which will now be empty
+        }
+
+        // --- 6. Carousel Logic ---
+
+        function updateCarousel() {
+            const container = document.getElementById('carousel-container');
+            const dotsContainer = document.getElementById('carousel-dots');
+            container.innerHTML = '';
+            dotsContainer.innerHTML = '';
+
+            carouselData.forEach((comic, index) => {
+                // Use a placeholder image if the uploaded image doesn't work for the carousel background
+                const imgSrc = comic.id === "001" ? "https://placehold.co/1920x400/b91c1c/ffffff?text=SPIDER-VERSE+FEATURED" : comic.image;
+                
+                // Slide Content
+                const slide = document.createElement('div');
+                slide.className = `absolute inset-0 transition-opacity duration-700 ease-in-out ${index === currentSlideIndex ? 'opacity-100' : 'opacity-0'}`;
+                slide.innerHTML = `
+                    <div class="h-full w-full bg-cover bg-center" style="background-image: url('${imgSrc}'); background-size: cover; background-position: center;">
+                        <!-- Overlay for text readability -->
+                        <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+                        <div class="absolute inset-0 flex flex-col justify-center items-start text-white p-6 sm:p-12 lg:p-20">
+                            <span class="text-sm font-semibold mb-2 bg-red-600 px-3 py-1 rounded-full shadow-lg">Featured Comic</span>
+                            <h3 class="text-4xl sm:text-6xl font-extrabold mb-3 leading-tight">${comic.title}</h3>
+                            <p class="text-lg sm:text-xl max-w-lg mb-6">${comic.description.substring(0, 100)}...</p>
+                            <button onclick="showView('comic-detail', '${comic.id}')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition text-lg shadow-xl">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(slide);
+
+                // Dots
+                const dot = document.createElement('span');
+                dot.className = `h-3 w-3 mx-1 rounded-full cursor-pointer transition-all duration-300 ${index === currentSlideIndex ? 'bg-red-600 scale-125' : 'bg-white bg-opacity-50 hover:bg-opacity-80'}`;
+                dot.onclick = () => { currentSlideIndex = index; updateCarousel(); };
+                dotsContainer.appendChild(dot);
+            });
+        }
+
+        function nextSlide() {
+            currentSlideIndex = (currentSlideIndex + 1) % carouselData.length;
+            updateCarousel();
+        }
+
+        function prevSlide() {
+            currentSlideIndex = (currentSlideIndex - 1 + carouselData.length) % carouselData.length;
+            updateCarousel();
+        }
+
+        // --- 7. Initialization and Event Listeners ---
+
+        function initFilterOptions() {
+            const publishers = [...new Set(comicsData.map(c => c.publisher))].sort();
+            const genres = [...new Set(comicsData.map(c => c.genre))].sort();
+            const characters = [...new Set(comicsData.map(c => c.character))].sort();
+
+            function populateSelect(id, options) {
+                const select = document.getElementById(id);
+                select.innerHTML = '<option value="">All</option>' +
+                    options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+                // Add event listener to trigger filtering
+                select.addEventListener('change', () => renderBrowsePage(comicsData));
+            }
+
+            populateSelect('filter-publisher', publishers);
+            populateSelect('filter-genre', genres);
+            populateSelect('filter-character', characters);
+            document.getElementById('sort-by').addEventListener('change', () => renderBrowsePage(comicsData));
+        }
+
+        function filterByPublisher(publisher) {
+            document.getElementById('filter-publisher').value = publisher;
+            showView('browse-comics');
+            // renderBrowsePage is called by showView('browse-comics') but let's call it manually just to be safe if the user is already on the browse page
+            renderBrowsePage(comicsData);
+        }
+
+        // Main app initialization function
+        function initApp() {
+            // 1. Initial Data Load
+            loadCart();
+
+            // 2. Setup Homepage and Carousel
+            renderHomepage();
+            updateCarousel();
+            setInterval(nextSlide, 5000); // Auto-advance carousel every 5 seconds
+
+            // 3. Setup Browse Page Filters
+            initFilterOptions();
+
+            // 4. Setup Cart/Checkout Listener
+            document.getElementById('checkout-btn').addEventListener('click', checkout);
+
+            // 5. Setup Home Navigation Click
+            document.getElementById('home-nav').addEventListener('click', () => showView('homepage'));
+
+            // 6. Start on the Homepage
+            showView('homepage');
+        }
+
+        // Run initialization when the window loads
+        window.onload = initApp;
+
+    </script>
+</body>
+</html>
